@@ -38,7 +38,17 @@ prog: $(PROJ).bin
 
 .PHONY: clean
 clean:
-	rm -f $(PROJ).json $(PROJ).config $(PROJ).bin
+	rm -f $(PROJ).json $(PROJ).config $(PROJ).bin tb_hellosoc.vvp tb_hellosoc.vcd
+
+.PHONY: test
+test: tb_hellosoc.vvp
+	vvp -n tb_hellosoc.vvp
+
+tb_hellosoc.vvp: tb_hellosoc.v $(SOURCES)
+	iverilog -o tb_hellosoc.vvp -g2009 tb_hellosoc.v $(SOURCES)
+
+.PHONY: sim
+sim: test
 
 .PHONY: help
 help:
@@ -47,12 +57,14 @@ help:
 	@echo "Targets:"
 	@echo "  all       - Build the bitstream (default)"
 	@echo "  prog      - Build and program the FPGA"
+	@echo "  test/sim  - Run testbench simulation"
 	@echo "  clean     - Remove build artifacts"
 	@echo ""
 	@echo "Requirements:"
 	@echo "  - yosys"
 	@echo "  - nextpnr-ice40"
 	@echo "  - icepack"
+	@echo "  - iverilog (for simulation)"
 	@echo "  - iceprog (for programming)"
 
 .DEFAULT_GOAL := all
