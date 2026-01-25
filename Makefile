@@ -44,8 +44,8 @@ clean:
 test: tb_hellosoc.vvp
 	vvp -n tb_hellosoc.vvp
 
-tb_hellosoc.vvp: tb_hellosoc.v $(SOURCES)
-	iverilog -o tb_hellosoc.vvp -g2009 tb_hellosoc.v $(SOURCES)
+tb_hellosoc.vvp: tb_hellosoc.v hellosoc_top.v tft_ili9341.v tft_ili9341_spi.v clkdiv.v
+	iverilog -o tb_hellosoc.vvp -g2009 tb_hellosoc.v hellosoc_top.v tft_ili9341.v tft_ili9341_spi.v clkdiv.v
 
 .PHONY: sim
 sim: test
