@@ -18,6 +18,10 @@ module tb_hellosoc();
     integer test_count = 0;
     integer test_pass = 0;
     integer test_fail = 0;
+    
+    // Helper to detect SPI activity
+    reg spi_activity_detected;
+    reg last_sck;
 
     // Clock generation: 12 MHz
     initial begin
@@ -127,10 +131,6 @@ module tb_hellosoc();
         $finish;
     end
 
-    // Helper to detect SPI activity
-    reg spi_activity_detected;
-    reg last_sck;
-
     task wait_for_spi_activity(input integer timeout);
         integer i;
         begin
@@ -150,10 +150,6 @@ module tb_hellosoc();
     endtask
 
     // Instantiate DUT (Device Under Test)
-    // Note: The main hellosoc_top cannot be directly instantiated
-    // because it depends on the PLL primitive which won't synthesize in simulation.
-    // Instead, we test the individual components.
-    
     // Test clkdiv module
     wire clk_10khz;
     clkdiv #(.div(10000), .bitSize(14)) clk_div_test(clk, clk_10khz);
