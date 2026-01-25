@@ -15,8 +15,7 @@ SOURCES = \
 	hellosoc_top.v \
 	tft_ili9341.v \
 	tft_ili9341_spi.v \
-	clkdiv.v \
-	pll_ice40.v
+	clkdiv.v
 
 CONSTRAINT = icesugar.pcf
 
