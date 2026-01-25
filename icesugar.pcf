@@ -1,0 +1,21 @@
+# iCEsugar 1.5 Pin Configuration for ILI9341 TFT LCD
+# FPGA: iCE40UP5K (SG48 package)
+
+# 12 MHz Main Clock
+set_io clk 35
+
+# --- PMOD2 Interface (LCD) ---
+set_io tft_cs 45        # Chip Select
+set_io tft_sdi 43       # MOSI (Data to LCD)
+set_io tft_dc 42        # Data/Command select (RS)
+set_io tft_sck 36       # SPI Clock
+
+# Status LEDs (RGB)
+set_io leds[0] 40       # Red LED
+set_io leds[1] 41       # Green LED
+set_io leds[2] 39       # Blue LED
+
+# Note: tft_reset and tft_sdo (MISO) are not pinned in this configuration
+# tft_reset can be tied high internally in the design
+# tft_sdo is not used for write-only display operation
+
