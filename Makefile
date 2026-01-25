@@ -3,7 +3,7 @@
 
 PROJ = hellosoc_top
 DEVICE = up5k 
-PACKAGE = cb132
+PACKAGE = sg48
 
 YOSYS = yosys
 NEXTPNR = nextpnr-ice40
