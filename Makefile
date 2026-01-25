@@ -2,8 +2,8 @@
 # Builds ILI9341 TFT display controller for iCE40 FPGA
 
 PROJ = hellosoc_top
-DEVICE = 1k
-PACKAGE = cb132
+DEVICE = up5k
+PACKAGE = sg48
 
 YOSYS = yosys
 NEXTPNR = nextpnr-ice40

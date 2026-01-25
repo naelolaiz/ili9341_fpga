@@ -2,13 +2,11 @@
 // Convert SystemVerilog to plain Verilog for iCE40 FPGA
 module hellosoc_top(
     input clk,
-    input tft_sdo,
     output tft_sck,
     output tft_sdi,
     output tft_dc,
-    output tft_reset,
     output tft_cs,
-    output [3:0] leds
+    output [2:0] leds
 );
 
     // Clock generation (12 MHz input from iCEsugar 1.5)
@@ -32,7 +30,7 @@ module hellosoc_top(
 
     // LEDs
     reg ledA = 1'b1;
-    assign leds = ~{ledA, 1'b0, 1'b0, 1'b0};
+    assign leds = ~{ledA, 1'b0, 1'b0};
 
     // *************************** Framebuffer
     reg [16:0] framebufferIndex = 17'd0;
@@ -67,7 +65,7 @@ module hellosoc_top(
                                    : 16'd0);
 
     // *************************** TFT Module
-    tft_ili9341 #(.INPUT_CLK_MHZ(100)) tft(tft_clk, tft_sdo, tft_sck, tft_sdi, tft_dc, tft_reset, tft_cs, currentPixel, fbClk);
+    tft_ili9341 #(.INPUT_CLK_MHZ(100)) tft(tft_clk, 1'b0, tft_sck, tft_sdi, tft_dc, 1'b1, tft_cs, currentPixel, fbClk);
 
 endmodule
 
