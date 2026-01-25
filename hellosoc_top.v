@@ -15,7 +15,7 @@ module hellosoc_top(
     wire clk_10khz;
     wire gameClk;
 
-    // Simple clock multiplier using SB_PLL40_CORE (iCE40 PLL)
+    // Simple clock multiplier using SB_PLL40_PAD (iCE40 PLL)
     // For iCEsugar 1.5, generate 100MHz from 12MHz input
     pll #(.DIV(1), .MUL(25), .FREQ("100")) pll_inst(
         .clk_i(clk),

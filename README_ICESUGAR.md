@@ -12,7 +12,7 @@ This is a port of the ILI9341 TFT LCD display driver to the iCEsugar 1.5 board, 
 
 - **Ported to iCE40 HX8K FPGA** (iCEsugar 1.5)
   - Replaced Quartus-specific files with open-source toolchain files
-  - Updated PLL module to use iCE40 `SB_PLL40_CORE` primitive
+  - Updated PLL module to use iCE40 `SB_PLL40_PAD` primitive
   - Created PCF constraint file for iCEsugar 1.5 pinout
 
 - **Build system changes**
