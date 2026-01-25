@@ -10,9 +10,8 @@ module tb_hellosoc();
     wire tft_sck;
     wire tft_sdi;
     wire tft_dc;
-    wire tft_reset;
     wire tft_cs;
-    wire [3:0] leds;
+    wire [2:0] leds;
 
     // Test counter
     integer test_count = 0;
@@ -53,18 +52,7 @@ module tb_hellosoc();
             test_fail = test_fail + 1;
         end
         
-        // Test 2: Check reset assertion
-        test_count = test_count + 1;
-        $display("\n[TEST %0d] TFT Reset signal", test_count);
-        if (tft_reset === 1'b0) begin
-            $display("  PASS: Reset is asserted (low)");
-            test_pass = test_pass + 1;
-        end else begin
-            $display("  FAIL: Reset not properly asserted");
-            test_fail = test_fail + 1;
-        end
-        
-        // Test 3: Check CS is inactive initially
+        // Test 2: Check CS is inactive initially
         test_count = test_count + 1;
         $display("\n[TEST %0d] Chip Select (CS) inactive", test_count);
         if (tft_cs === 1'b1) begin
@@ -75,11 +63,11 @@ module tb_hellosoc();
             test_fail = test_fail + 1;
         end
         
-        // Test 4: LED test
+        // Test 3: LED test
         test_count = test_count + 1;
         $display("\n[TEST %0d] LED output active", test_count);
-        if (leds !== 4'b0000) begin
-            $display("  PASS: LEDs are active (value: %04b)", leds);
+        if (leds !== 3'b000) begin
+            $display("  PASS: LEDs are active (value: %03b)", leds);
             test_pass = test_pass + 1;
         end else begin
             $display("  FAIL: LEDs should be active");
@@ -89,18 +77,7 @@ module tb_hellosoc();
         // Wait for initialization sequence to start
         #1_000_000;
         
-        // Test 5: Check reset release after delay
-        test_count = test_count + 1;
-        $display("\n[TEST %0d] TFT Reset release", test_count);
-        if (tft_reset === 1'b1) begin
-            $display("  PASS: Reset released (high)");
-            test_pass = test_pass + 1;
-        end else begin
-            $display("  FAIL: Reset should be released");
-            test_fail = test_fail + 1;
-        end
-        
-        // Test 6: Monitor SPI activity
+        // Test 4: Monitor SPI activity
         test_count = test_count + 1;
         $display("\n[TEST %0d] SPI Clock activity", test_count);
         wait_for_spi_activity(5_000_000);  // Wait up to 5ms for SPI activity
@@ -123,12 +100,13 @@ module tb_hellosoc();
         
         if (test_fail == 0) begin
             $display("Status:      ALL TESTS PASSED");
+            $display("========================================\n");
+            $finish(0);
         end else begin
             $display("Status:      SOME TESTS FAILED");
+            $display("========================================\n");
+            $finish(1);
         end
-        $display("========================================\n");
-        
-        $finish;
     end
 
     task wait_for_spi_activity(input integer timeout);
@@ -150,12 +128,21 @@ module tb_hellosoc();
     endtask
 
     // Instantiate DUT (Device Under Test)
+    hellosoc_top dut(
+        .clk(clk),
+        .tft_sck(tft_sck),
+        .tft_sdi(tft_sdi),
+        .tft_dc(tft_dc),
+        .tft_cs(tft_cs),
+        .leds(leds)
+    );
+
     // Test clkdiv module
     wire clk_10khz;
     clkdiv #(.div(10000), .bitSize(14)) clk_div_test(clk, clk_10khz);
 
     // Test SPI module
-    wire tft_sdi_test, tft_dc_test, tft_cs_test, spi_idle;
+    wire tft_sck_test, tft_sdi_test, tft_dc_test, tft_cs_test, spi_idle;
     reg [8:0] spi_data = 9'h000;
     reg spi_data_available = 1'b0;
 
@@ -163,7 +150,7 @@ module tb_hellosoc();
         .spiClk(clk),
         .data(spi_data),
         .dataAvailable(spi_data_available),
-        .tft_sck(tft_sck),
+        .tft_sck(tft_sck_test),
         .tft_sdi(tft_sdi_test),
         .tft_dc(tft_dc_test),
         .tft_cs(tft_cs_test),
