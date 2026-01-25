@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: docker.io/davidsiaw/yosys-docker:latest
 
@@ -30,6 +32,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: docker.io/davidsiaw/yosys-docker:latest
 
