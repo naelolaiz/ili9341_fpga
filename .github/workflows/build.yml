@@ -1,0 +1,49 @@
+name: Build FPGA Bitstream
+
+on:
+  push:
+    branches: [ master, icesugar ]
+  pull_request:
+    branches: [ master, icesugar ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/davidsiaw/yosys-docker:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build bitstream
+        run: |
+          make clean
+          make all
+
+      - name: List output files
+        run: ls -lah *.bin *.config 2>/dev/null || echo "Build artifacts ready"
+
+      - name: Upload bitstream artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hellosoc_top-bitstream
+          path: hellosoc_top.bin
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload configuration artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hellosoc_top-config
+          path: hellosoc_top.config
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload synthesis artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hellosoc_top-synthesis
+          path: hellosoc_top.json
+          retention-days: 30
+          if-no-files-found: warn
