@@ -65,7 +65,7 @@ module hellosoc_top(
                                    : 16'd0);
 
     // *************************** TFT Module
-    wire tft_reset_internal = 1'b1;  // Reset tied high (not pinned on board)
+    wire tft_reset_internal;  // Reset controlled by TFT module (output)
     tft_ili9341 #(.INPUT_CLK_MHZ(100)) tft(tft_clk, 1'b0, tft_sck, tft_sdi, tft_dc, tft_reset_internal, tft_cs, currentPixel, fbClk);
 
 endmodule
