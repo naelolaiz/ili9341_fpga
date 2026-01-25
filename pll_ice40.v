@@ -9,14 +9,30 @@ module pll(
     parameter MUL = 25;
     parameter FREQ = "100"; // output frequency in MHz
 
-    // Instantiate SB_PLL40_CORE for iCE40
-    // Default: 12MHz * 25 / 3 = 100MHz
+    // For synthesis: Use the iCE40 PLL primitive
+    // For simulation: Simple clock passthrough
+    
+    (* blackbox *)
+    module SB_PLL40_CORE(
+        input REFERENCECLK,
+        input RESETB,
+        input BYPASS,
+        output PLLOUTCORE
+    );
+        parameter FEEDBACK_PATH = "SIMPLE";
+        parameter PLLOUT_SELECT = "GENCLK";
+        parameter DIVR = 4'b0100;
+        parameter DIVF = 7'b0011000;
+        parameter DIVQ = 3'b011;
+        parameter FILTER_RANGE = 3'b001;
+    endmodule
+    
     SB_PLL40_CORE #(
         .FEEDBACK_PATH("SIMPLE"),
         .PLLOUT_SELECT("GENCLK"),
-        .DIVR(4'b0100),        // DIVR = 4 (12MHz input divider)
-        .DIVF(7'b0011000),     // DIVF = 24 (multiply by 25, so 24+1)
-        .DIVQ(3'b011),         // DIVQ = 3 (divide by 8, final divider)
+        .DIVR(4'b0100),        // DIVR = 4
+        .DIVF(7'b0011000),     // DIVF = 24
+        .DIVQ(3'b011),         // DIVQ = 3
         .FILTER_RANGE(3'b001)
     ) pll_inst (
         .RESETB(1'b1),

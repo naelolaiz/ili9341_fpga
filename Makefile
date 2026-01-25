@@ -11,12 +11,7 @@ ICEPACK = icepack
 ICEPROG = iceprog
 
 # Source files
-SOURCES = \
-	hellosoc_top.v \
-	tft_ili9341.v \
-	tft_ili9341_spi.v \
-	clkdiv.v \
-	pll_ice40.v
+SOURCES = hellosoc_top.v tft_ili9341.v tft_ili9341_spi.v clkdiv.v pll_ice40.v
 
 CONSTRAINT = icesugar.pcf
 
