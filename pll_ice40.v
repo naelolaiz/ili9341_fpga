@@ -4,8 +4,8 @@
 // For synthesis: Use the iCE40 PLL primitive
 // For simulation: Simple clock passthrough
 (* blackbox *)
-module SB_PLL40_CORE(
-    input REFERENCECLK,
+module SB_PLL40_PAD(
+    input PACKAGEPIN,
     input RESETB,
     input BYPASS,
     output PLLOUTCORE
@@ -27,7 +27,7 @@ module pll(
     parameter MUL = 25;
     parameter FREQ = "100"; // output frequency in MHz
     
-    SB_PLL40_CORE #(
+    SB_PLL40_PAD #(
         .FEEDBACK_PATH("SIMPLE"),
         .PLLOUT_SELECT("GENCLK"),
         .DIVR(4'b0100),        // DIVR = 4
@@ -37,7 +37,7 @@ module pll(
     ) pll_inst (
         .RESETB(1'b1),
         .BYPASS(1'b0),
-        .REFERENCECLK(clk_i),
+        .PACKAGEPIN(clk_i),
         .PLLOUTCORE(clk_o)
     );
 
