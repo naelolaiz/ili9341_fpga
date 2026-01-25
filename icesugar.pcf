@@ -1,0 +1,25 @@
+# iCEsugar 1.5 Pin Configuration (PCF)
+# Based on iCEsugar FPGA breakout board pinout
+
+# Main clock input (12 MHz)
+set_io clk J3
+
+# TFT Display SPI interface
+set_io tft_sck G2
+set_io tft_sdi H2
+set_io tft_sdo F1
+set_io tft_dc H1
+set_io tft_reset K1
+set_io tft_cs K2
+
+# LEDs
+set_io leds[0] C3
+set_io leds[1] B3
+set_io leds[2] C4
+set_io leds[3] A4
+
+# Optional: Pmod connector expansion (SPI header)
+# set_io spi_clk G1
+# set_io spi_mosi H3
+# set_io spi_miso J1
+# set_io spi_cs J2
