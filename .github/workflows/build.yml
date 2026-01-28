@@ -62,90 +62,108 @@ jobs:
 
       - name: Install visualization tools
         run: |
-          apt-get update && apt-get install -y wget xvfb xauth imagemagick python3-pip nodejs npm
-          pip3 install vcd2wavedrom wavedrom
-          npm install -g netlistsvg
+          apt-get update && apt-get install -y python3-pip nodejs npm
+          pip3 install vcdvcd
+          npm install -g netlistsvg wavedrom-cli
 
       - name: Generate waveform graphics
         run: |
           if [ -f tb_hellosoc.vcd ]; then
-            # Create a Python script to convert VCD to WaveDrom JSON and then to SVG
+            # Create a Python script to convert VCD to WaveDrom JSON
             cat > vcd2img.py << 'EOFPY'
-          #!/usr/bin/env python3
-          import sys
-          import os
-          import json
-          import subprocess
-          
-          def vcd_to_wavedrom(vcd_file):
-              """Convert VCD file to WaveDrom format and SVG"""
-              try:
-                  from vcdvcd import VCDVCD
-                  
-                  vcd = VCDVCD(vcd_file)
-                  base_name = os.path.splitext(os.path.basename(vcd_file))[0]
-                  
-                  # Create WaveDrom JSON
-                  wavedrom = {
-                      "signal": [],
-                      "config": {"hscale": 2}
-                  }
-                  
-                  # Get first few signals (limit to avoid overcrowding)
-                  signals = list(vcd.signals.keys())[:20]
-                  
-                  for sig_name in signals:
-                      signal = vcd[sig_name]
-                      wave_data = []
-                      
-                      # Sample the signal values
-                      for tv in signal.tv[:50]:  # Limit samples
-                          wave_data.append(str(tv[1]))
-                      
-                      wavedrom["signal"].append({
-                          "name": sig_name.split('.')[-1],
-                          "wave": "".join(wave_data) if wave_data else "x"
-                      })
-                  
-                  # Save WaveDrom JSON
-                  json_file = f"{base_name}_wavedrom.json"
-                  with open(json_file, 'w') as f:
-                      json.dump(wavedrom, f, indent=2)
-                  
-                  print(f"Generated WaveDrom JSON: {json_file}")
-                  
-                  # Try to convert to SVG using wavedrom-cli if available
-                  try:
-                      svg_file = f"gtkwave_{base_name}.svg"
-                      subprocess.run(['wavedrom-cli', '-i', json_file, '-s', svg_file], check=True, timeout=30)
-                      print(f"Generated SVG: {svg_file}")
-                  except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
-                      print(f"Could not generate SVG: {e}")
-                  
-                  return json_file
-                  
-              except ImportError:
-                  print("vcdvcd not available, trying alternative approach")
-                  # Simple fallback - just note the file exists
-                  base_name = os.path.splitext(os.path.basename(vcd_file))[0]
-                  info_file = f"gtkwave_{base_name}_info.txt"
-                  with open(info_file, 'w') as f:
-                      f.write(f"VCD waveform file generated: {vcd_file}\n")
-                      f.write(f"File size: {os.path.getsize(vcd_file)} bytes\n")
-                  print(f"Generated info file: {info_file}")
-                  return info_file
-              except Exception as e:
-                  print(f"Error processing VCD: {e}")
-                  return None
-          
-          if __name__ == "__main__":
-              if len(sys.argv) < 2:
-                  print("Usage: vcd2img.py <vcd_file>")
-                  sys.exit(1)
-              vcd_to_wavedrom(sys.argv[1])
-          EOFPY
+#!/usr/bin/env python3
+import sys
+import os
+import json
+import subprocess
+
+def vcd_to_wavedrom(vcd_file):
+    """Convert VCD file to WaveDrom JSON format"""
+    try:
+        from vcdvcd import VCDVCD
+        
+        vcd = VCDVCD(vcd_file)
+        base_name = os.path.splitext(os.path.basename(vcd_file))[0]
+        
+        # Create WaveDrom JSON
+        wavedrom = {
+            "signal": [],
+            "config": {"hscale": 2}
+        }
+        
+        # Get first few signals (limit to avoid overcrowding)
+        signals = list(vcd.signals.keys())[:20]
+        
+        for sig_name in signals:
+            signal = vcd[sig_name]
+            wave_str = ""
+            prev_val = None
+            
+            # Convert VCD values to WaveDrom format
+            for tv in signal.tv[:100]:  # Limit samples
+                val = tv[1]
+                # Convert to WaveDrom wave characters
+                if val == '0':
+                    wave_str += '0'
+                elif val == '1':
+                    wave_str += '1'
+                elif val in ['x', 'X']:
+                    wave_str += 'x'
+                elif val in ['z', 'Z']:
+                    wave_str += 'z'
+                else:
+                    # For multi-bit values, use '=' for data
+                    wave_str += '='
+            
+            if wave_str:
+                wavedrom["signal"].append({
+                    "name": sig_name.split('.')[-1],
+                    "wave": wave_str
+                })
+        
+        # Save WaveDrom JSON
+        json_file = f"{base_name}_wavedrom.json"
+        with open(json_file, 'w') as f:
+            json.dump(wavedrom, f, indent=2)
+        
+        print(f"Generated WaveDrom JSON: {json_file}")
+        
+        # Try to convert to SVG using wavedrom-cli if available
+        try:
+            svg_file = f"{base_name}_waveform.svg"
+            subprocess.run(['wavedrom-cli', '-i', json_file, '-s', svg_file], check=True, timeout=30)
+            print(f"Generated SVG: {svg_file}")
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+            print(f"Could not generate SVG: {e}")
+            # Create a simple info file
+            info_file = f"{base_name}_waveform_info.txt"
+            with open(info_file, 'w') as f:
+                f.write(f"VCD waveform file generated: {vcd_file}\n")
+                f.write(f"WaveDrom JSON available: {json_file}\n")
+                f.write(f"File size: {os.path.getsize(vcd_file)} bytes\n")
+            print(f"Generated info file: {info_file}")
+        
+        return json_file
+        
+    except Exception as e:
+        print(f"Error processing VCD: {e}")
+        # Create a simple info file as fallback
+        base_name = os.path.splitext(os.path.basename(vcd_file))[0]
+        info_file = f"{base_name}_waveform_info.txt"
+        with open(info_file, 'w') as f:
+            f.write(f"VCD waveform file generated: {vcd_file}\n")
+            f.write(f"File size: {os.path.getsize(vcd_file)} bytes\n")
+            f.write(f"Error: {e}\n")
+        print(f"Generated info file: {info_file}")
+        return info_file
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: vcd2img.py <vcd_file>")
+        sys.exit(1)
+    vcd_to_wavedrom(sys.argv[1])
+EOFPY
             chmod +x vcd2img.py
-            pip3 install vcdvcd || true
             python3 vcd2img.py tb_hellosoc.vcd || echo "Note: VCD visualization had issues, VCD file is still available"
           fi
 
@@ -161,8 +179,8 @@ jobs:
         with:
           name: testbench-graphics
           path: |
-            gtkwave_*.svg
-            gtkwave_*.txt
+            *_waveform.svg
+            *_waveform_info.txt
             *_wavedrom.json
           retention-days: 30
           if-no-files-found: warn
