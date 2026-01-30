@@ -15,7 +15,7 @@ The workflow now generates and uploads additional artifacts to help visualize an
 
 **How it works:**
 1. After the testbench simulation runs and generates `tb_hellosoc.vcd`, the workflow installs visualization tools
-2. A Python script (`vcd2img.py`) reads the VCD file using the `vcdvcd` library
+2. The Python script `scripts/vcd2img.py` reads the VCD file using the `vcdvcd` library
 3. It converts the VCD signals to WaveDrom JSON format (up to 20 signals, 100 samples each)
 4. If `wavedrom-cli` is available, it generates an SVG visualization
 5. All generated files are uploaded as artifacts with 30-day retention
