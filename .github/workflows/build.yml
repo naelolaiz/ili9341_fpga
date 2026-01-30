@@ -59,3 +59,43 @@ jobs:
           path: tb_hellosoc.vcd
           retention-days: 30
           if-no-files-found: warn
+
+      - name: Install visualization tools
+        run: |
+          apt-get update && apt-get install -y python3-pip nodejs npm
+          pip3 install vcdvcd==2.3.3
+          npm install -g netlistsvg@1.0.0 wavedrom-cli@2.6.8
+
+      - name: Generate waveform graphics
+        run: |
+          if [ -f tb_hellosoc.vcd ]; then
+            chmod +x scripts/vcd2img.py
+            python3 scripts/vcd2img.py tb_hellosoc.vcd || echo "Note: VCD visualization had issues, VCD file is still available"
+          fi
+
+      - name: Generate logic diagrams
+        run: |
+          if [ -f hellosoc_top.json ]; then
+            # Generate netlist diagram from synthesis JSON
+            netlistsvg hellosoc_top.json -o hellosoc_top_diagram.svg || echo "Note: netlistsvg generation had issues"
+          fi
+
+      - name: Upload waveform graphics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: testbench-graphics
+          path: |
+            *_waveform.svg
+            *_waveform_info.txt
+            *_wavedrom.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload logic diagrams artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: logic-diagrams
+          path: |
+            *_diagram.svg
+          retention-days: 30
+          if-no-files-found: warn
